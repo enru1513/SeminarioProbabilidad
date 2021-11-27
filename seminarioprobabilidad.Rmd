@@ -1,0 +1,63 @@
+---
+title: "ProbabilidadSeminario"
+author: "enrique"
+date: "26/11/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+set.seed(20) #de esta forma nos salen siempre los mismos resultados
+pa=0.495 #probabilidad de ganar en el juego A
+pb=0.495652356653209 #probabilidad de ganar en el juego B
+pab=0.507852112676056 #probabilidad de ganar en un juego donde se elige aleatoriamente si jugar al A o al B
+n=3000 #número de experimentos
+m=100 #número de turnos
+r=0:(m-1)
+ganancia=c(1,-1)
+
+ 
+random=function(p){  
+  #INPUT: p= probabilidad de ganar
+  #OUTPUT: cumsum(w)= contiene en la componente i la suma de los valores del vector w hasta su componente i, i.e., la ganancia total hasta el turno i.
+  w=sample(x=ganancia, size=m,replace=TRUE, c(p,1-p)) #creamos un vector con m componentes que contiene en cada una de sus componentes un 1 con probabilidad p y un -1 con probabilidad 1-p
+cumsum(w)
+}
+
+#JUEGO A
+SumaA=1:m #pre-creamos un vector de m componentes
+A=replicate(n, expr=random(pa)) #realizamos el experimento n veces
+for(i in 1:m){
+  SumaA[i]=sum(A[i,]) #sumamos la ganancia de cada uno de los jugadores para cada uno de los turnos
+}
+SumaA=SumaA/n #calculamos la media para obtener una estimación de la ganancia por turno.
+
+#JUEGO B
+SumaB=1:m
+B=replicate(n, expr=random(pb))
+for (i in 1:m){
+  SumaB[i]=sum(B[i,])
+}
+SumaB=SumaB/n
+
+#COMBINACIÓN ALEATORIA
+SumaRAND=1:m #pre-creamos un vector de m componentes
+RAND=replicate(n, expr=random(pab))
+for (i in 1:m){
+  SumaRAND[i]=sum(RAND[i,])
+}
+SumaRAND=SumaRAND/n
+
+#Usamos GGPLOT2 para las gráficas.
+x = data.frame("Turnos" = c(r,r,r) , "Ganancia" = c(SumaA,SumaB,SumaRAND) , "Juego"= c(rep("Juego A",m), rep("Juego B",m),rep("Combinación aleatoria",m))) #creamos un dataframe para usar el ggplot.
+
+ggplot(data = x) +
+  geom_point(aes(x = Turnos, y = Ganancia, color = Juego)) + #Dependiendo del Juego, pone un color u otro
+  labs(color = " ")
+
+```
+
